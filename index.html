@@ -235,6 +235,9 @@
             text-decoration: none; 
             box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4); 
             transition: transform 0.2s, box-shadow 0.2s; 
+            margin-bottom: 15px;
+            display: block;
+            text-align: center;
         }
         .spin-btn:active { 
             transform: scale(0.95); 
@@ -293,16 +296,36 @@
             font-weight: bold; 
             width: 100%; 
             margin-bottom: 15px; 
+            font-size: 1rem;
+            transition: transform 0.2s;
+        }
+        .tiktok-btn:active {
+            transform: scale(0.98);
         }
         
-        /* Close Button */
+        /* Zalo Close Button styled as a real Button */
         .close-btn { 
-            color: #888; 
-            font-size: 0.9rem; 
-            cursor: pointer; 
-            text-decoration: underline; 
-            background: none; 
-            border: none; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            background-color: #0068ff; 
+            color: #fff; 
+            padding: 14px 25px; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            font-weight: bold; 
+            width: 100%; 
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 104, 255, 0.2);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .close-btn:hover {
+            background-color: #0056d4;
+        }
+        .close-btn:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
@@ -322,7 +345,7 @@
                 Follow TikTok
             </a>
             
-            <button class="close-btn" onclick="window.location.href='${spinUrl}'">Bỏ qua, tới vòng quay may mắn</button>
+            <button class="close-btn" onclick="window.location.href='${spinUrl}'">Tới vòng quay may mắn</button>
         </div>
     </div>
 
