@@ -3,13 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Trang Trung Gian Vòng Quay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Custom scrollbar cho textarea */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        /* Animation cho Toast Notification */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .toast-exit { animation: fadeOut 0.3s ease-in forwards; }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-white shadow-sm border-b border-gray-200 py-4 px-6 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-red-600 text-white p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h1 class="text-xl font-bold text-gray-800">Trang Tạo Landing Page Vòng Quay</h1>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-hidden flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 gap-6">
+        
+        <!-- Cột bên trái: Form nhập liệu -->
+        <div class="w-full md:w-1/3 bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col h-full overflow-y-auto">
+            <h2 class="text-lg font-semibold border-b pb-3 mb-4">Thông tin chiến dịch</h2>
+            
+            <div class="space-y-4 flex-1">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên chương trình (Để lưu file)</label>
+                    <input type="text" id="campaignName" placeholder="VD: vong-quay-thang-10" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Link Vòng Quay May Mắn <span class="text-red-500">*</span></label>
+                    <input type="url" id="spinUrl" placeholder="https://example.com/vong-quay-1" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all">
+                    <p class="text-xs text-gray-500 mt-1">Link này sẽ được gắn vào nút tham gia và nút bỏ qua.</p>
+                </div>
+
+                <button onclick="generatePage()" 
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                    </svg>
+                    Tạo & Xem Trước
+                </button>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <h2 class="text-sm font-semibold text-gray-800 mb-3 flex items-center justify-between cursor-pointer" onclick="toggleGithubConfig()">
+                    Cấu hình GitHub (Tự động đẩy Code)
+                    <span id="ghToggleIcon" class="text-xs text-blue-600">Hiện ⬇️</span>
+                </h2>
+                <div id="githubConfig" class="space-y-3 hidden">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">GitHub Token (PAT) <span class="text-red-500">*</span></label>
+                        <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx" class="w-full px-3 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-red-500 outline-none text-sm">
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="w-1/2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Username/Owner <span class="text-red-500">*</span></label>
+                            <input type="text" id="ghOwner" placeholder="vd: nguyenvan" class="w-full px-3 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-red-500 outline-none text-sm">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Tên Repository <span class="text-red-500">*</span></label>
+                            <input type="text" id="ghRepo" placeholder="vd: vong-quay-app" class="w-full px-3 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-red-500 outline-none text-sm">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="w-1/2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Thư mục (VD: pages/)</label>
+                            <input type="text" id="ghPath" placeholder="Để trống nếu lưu ở root" class="w-full px-3 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-red-500 outline-none text-sm">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Branch</label>
+                            <input type="text" id="ghBranch" value="main" class="w-full px-3 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-red-500 outline-none text-sm">
+                        </div>
+                    </div>
+                    <button onclick="saveGithubConfig()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs py-2 rounded border border-gray-300 font-medium transition-colors">Lưu cấu hình</button>
+                    <p class="text-[10px] text-gray-500 leading-tight">Cấu hình sẽ được lưu trên trình duyệt của bạn cho những lần sau.</p>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <p class="text-sm text-gray-600 mb-3">Hành động:</p>
+                <div class="flex flex-col gap-2">
+                    <button onclick="pushToGitHub()" id="githubBtn" disabled class="disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        Đẩy File Lên GitHub
+                    </button>
+                    <button onclick="copyCode()" id="copyBtn" disabled class="disabled:opacity-50 disabled:cursor-not-allowed bg-gray-800 hover:bg-gray-900 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium">
+                        Sao chép mã HTML
+                    </button>
+                    <button onclick="downloadCode()" id="downloadBtn" disabled class="disabled:opacity-50 disabled:cursor-not-allowed bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium">
+                        Tải file .html về máy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full md:w-2/3 flex flex-col gap-4 h-full overflow-hidden">
+            
+            <!-- Phần Preview (Iframe) -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col flex-1 overflow-hidden">
+                <div class="bg-gray-50 border-b px-4 py-2 flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-600">Xem trước trực tiếp (Preview)</span>
+                    <div class="flex gap-1.5">
+                        <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                    </div>
+                </div>
+                <div class="flex-1 bg-gray-100 relative">
+                    <iframe id="previewFrame" class="w-full h-full absolute inset-0 border-none" title="Preview"></iframe>
+                    <div id="emptyPreview" class="absolute inset-0 flex items-center justify-center text-gray-400 flex-col">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <p>Nhập link và bấm "Tạo Trang Mới" để xem trước</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phần Code HTML Textarea -->
+            <div class="bg-gray-900 rounded-xl shadow-sm border border-gray-800 flex flex-col h-1/3 shrink-0">
+                <div class="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-300">Mã HTML sinh ra</span>
+                </div>
+                <textarea id="outputCode" readonly class="w-full h-full bg-transparent text-green-400 p-4 font-mono text-sm resize-none outline-none" placeholder="<!-- Code sẽ xuất hiện ở đây -->"></textarea>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        // Hàm tạo Toast Notification (thay thế cho alert)
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            // Set styles based on type
+            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-500';
+            
+            toast.className = `toast-enter ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg font-medium text-sm flex items-center gap-2`;
+            
+            const icon = type === 'success' 
+                ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`
+                : `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>`;
+            
+            toast.innerHTML = `${icon} ${message}`;
+            container.appendChild(toast);
+
+            // Tự động xóa sau 3 giây
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300); // Đợi animation fadeOut xong
+            }, 3000);
+        }
+
+        // Hàm chứa cấu trúc HTML Template (Sử dụng string template để thay thế link)
+        function getTemplate(spinUrl) {
+            // Đây là template gốc của bạn, với biến ${spinUrl} thay cho link fix cứng
+            return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>haichai - Nhận Ưu Đãi & Vòng Quay May Mắn</title>
     <style>
         /* Reset & Base */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #1a1a1a; /* Màu nền tối làm nổi bật các nút */
+            background-color: #1a1a1a; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -19,7 +224,7 @@
         
         /* Main Button (Vòng quay may mắn) */
         .spin-btn { 
-            background-color: #d32f2f; /* Màu đỏ nổi bật, có thể chỉnh theo brand guideline */
+            background-color: #d32f2f; 
             color: white; 
             border: none; 
             padding: 16px 32px; 
@@ -103,39 +308,248 @@
 </head>
 <body>
 
-    <!-- Nút chính trên trang -->
-    <a href="LINK_VONG_QUAY_CUA_BAN_O_DAY" class="spin-btn">🎁 Tham Gia Vòng Quay</a>
+    <a href="${spinUrl}" class="spin-btn">🎁 Tham Gia Vòng Quay</a>
 
-    <!-- Popup TikTok -->
     <div class="modal-overlay" id="tiktokModal">
         <div class="modal-content">
             <h2>Theo dõi haichai ngay!</h2>
             <p>Nhận thêm nhiều chương trình khuyến mãi và ưu đãi đặc biệt chỉ dành riêng cho follower TikTok.</p>
             
-           <!-- Nút Follow -->
-            <a href="LINK_TIKTOK_HAICHAI_O_DAY" target="_blank" class="tiktok-btn" onclick="closeModal()">
+           <a href="https://www.tiktok.com/@haichai.trung" target="_blank" class="tiktok-btn" onclick="closeModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3z"/>
                 </svg>
                 Follow TikTok
             </a>
             
-            <!-- Nút tắt popup -->
-            <button class="close-btn" onclick="closeModal()">Bỏ qua, tới vòng quay may mắn</button>
+            <button class="close-btn" onclick="window.location.href='${spinUrl}'">Bỏ qua, tới vòng quay may mắn</button>
         </div>
     </div>
 
     <script>
-        // Hiển thị popup sau khi trang tải xong với độ trễ 0.5s để tạo cảm giác mượt mà
+        // Hiển thị popup sau khi trang tải xong với độ trễ 0.5s
         window.onload = function() {
             setTimeout(() => {
                 document.getElementById('tiktokModal').classList.add('active');
             }, 500); 
         };
 
-        // Hàm đóng popup khi khách ấn "Follow" hoặc "Bỏ qua"
+        // Hàm này giờ chỉ còn dùng cho nút Follow TikTok (để ẩn popup sau khi khách nhấn sang tab TikTok)
         function closeModal() {
             document.getElementById('tiktokModal').classList.remove('active');
+        }
+    <\/script>
+</body>
+</html>`;
+        }
+
+        let currentGeneratedCode = "";
+
+        function generatePage() {
+            const spinUrl = document.getElementById('spinUrl').value.trim();
+            
+            if (!spinUrl) {
+                showToast("Vui lòng nhập Link Vòng Quay!", "error");
+                document.getElementById('spinUrl').focus();
+                return;
+            }
+
+            // Sinh code HTML
+            currentGeneratedCode = getTemplate(spinUrl);
+
+            // Cập nhật textarea
+            document.getElementById('outputCode').value = currentGeneratedCode;
+
+            // Cập nhật iframe preview
+            const iframe = document.getElementById('previewFrame');
+            const emptyPreview = document.getElementById('emptyPreview');
+            
+            iframe.srcdoc = currentGeneratedCode;
+            emptyPreview.style.display = 'none';
+
+            // Mở khóa các nút
+            document.getElementById('copyBtn').disabled = false;
+            document.getElementById('downloadBtn').disabled = false;
+            document.getElementById('githubBtn').disabled = false;
+
+            showToast("Đã tạo trang thành công!");
+        }
+
+        // Tách logic lấy tên file ra hàm riêng để dùng chung
+        function getCampaignFileName() {
+            let campaignName = document.getElementById('campaignName').value.trim();
+            if(!campaignName) {
+                campaignName = "vong-quay-" + Math.floor(Math.random() * 10000);
+            }
+            // Đảm bảo tên file hợp lệ
+            campaignName = campaignName.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+            return `${campaignName}.html`;
+        }
+
+        /* --- TÍCH HỢP GITHUB API --- */
+        
+        // Load config khi mở trang
+        window.addEventListener('DOMContentLoaded', () => {
+            const config = JSON.parse(localStorage.getItem('githubConfig') || '{}');
+            if (config.token) document.getElementById('ghToken').value = config.token;
+            if (config.owner) document.getElementById('ghOwner').value = config.owner;
+            if (config.repo) document.getElementById('ghRepo').value = config.repo;
+            if (config.path) document.getElementById('ghPath').value = config.path;
+            if (config.branch) document.getElementById('ghBranch').value = config.branch;
+        });
+
+        function toggleGithubConfig() {
+            const panel = document.getElementById('githubConfig');
+            const icon = document.getElementById('ghToggleIcon');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                icon.textContent = 'Ẩn ⬆️';
+            } else {
+                panel.classList.add('hidden');
+                icon.textContent = 'Hiện ⬇️';
+            }
+        }
+
+        function saveGithubConfig() {
+            const config = {
+                token: document.getElementById('ghToken').value.trim(),
+                owner: document.getElementById('ghOwner').value.trim(),
+                repo: document.getElementById('ghRepo').value.trim(),
+                path: document.getElementById('ghPath').value.trim(),
+                branch: document.getElementById('ghBranch').value.trim() || 'main'
+            };
+            localStorage.setItem('githubConfig', JSON.stringify(config));
+            showToast("Đã lưu cấu hình GitHub!");
+            toggleGithubConfig();
+        }
+
+        // Hàm chuyển đổi Text sang Base64 chuẩn hỗ trợ Tiếng Việt (UTF-8)
+        function utf8_to_b64(str) {
+            return window.btoa(unescape(encodeURIComponent(str)));
+        }
+
+        async function pushToGitHub() {
+            if (!currentGeneratedCode) return;
+
+            const token = document.getElementById('ghToken').value.trim();
+            const owner = document.getElementById('ghOwner').value.trim();
+            const repo = document.getElementById('ghRepo').value.trim();
+            let path = document.getElementById('ghPath').value.trim();
+            const branch = document.getElementById('ghBranch').value.trim() || 'main';
+
+            if (!token || !owner || !repo) {
+                showToast("Vui lòng điền đủ Token, Username và Tên Repo trong phần Cấu hình GitHub!", "error");
+                document.getElementById('githubConfig').classList.remove('hidden');
+                document.getElementById('ghToggleIcon').textContent = 'Ẩn ⬆️';
+                return;
+            }
+
+            const btn = document.getElementById('githubBtn');
+            btn.innerHTML = `<svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Đang đẩy lên...`;
+            btn.disabled = true;
+
+            if (path && !path.endsWith('/')) path += '/';
+            const fileName = getCampaignFileName();
+            const fullPath = `${path}${fileName}`;
+
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${fullPath}`;
+            const contentBase64 = utf8_to_b64(currentGeneratedCode);
+
+            try {
+                // 1. Kiểm tra xem file đã tồn tại chưa để lấy SHA (Yêu cầu bắt buộc của GitHub nếu muốn ghi đè file cũ)
+                let sha = null;
+                const checkRes = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (checkRes.ok) {
+                    const fileData = await checkRes.json();
+                    sha = fileData.sha;
+                }
+
+                // 2. Push file lên GitHub
+                const body = {
+                    message: `Upload tự động trang: ${fileName}`,
+                    content: contentBase64,
+                    branch: branch
+                };
+                if (sha) body.sha = sha; // Kèm theo sha nếu ghi đè
+
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                if (response.ok) {
+                    const ghPagesUrl = `https://${owner}.github.io/${repo}/${fullPath}`;
+                    showToast(`Tuyệt vời! File đã được lưu trên GitHub.`);
+                    
+                    // Tạo một box thông báo thành công có chứa nút mở link
+                    const customMessage = `
+                        <div class="flex flex-col gap-2">
+                            <span>Đã đẩy mã lên GitHub thành công!</span>
+                            <a href="${ghPagesUrl}" target="_blank" class="text-yellow-300 underline text-xs">Mở trang web (Có thể mất 1-2 phút để GitHub Pages cập nhật)</a>
+                        </div>
+                    `;
+                    showToast(customMessage, "success");
+                } else {
+                    const error = await response.json();
+                    showToast(`Lỗi GitHub: ${error.message}`, "error");
+                }
+            } catch(e) {
+                showToast("Lỗi kết nối tới GitHub API!", "error");
+                console.error(e);
+            } finally {
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg> Đẩy File Lên GitHub`;
+                btn.disabled = false;
+            }
+        }
+
+        function copyCode() {
+            if (!currentGeneratedCode) return;
+            
+            // Sử dụng Clipboard API hiện đại, fallback sang execCommand nếu nằm trong iframe
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(currentGeneratedCode).then(() => {
+                    showToast("Đã copy code vào khay nhớ tạm!");
+                });
+            } else {
+                // Fallback for older browsers / specific iframe contexts
+                let textArea = document.getElementById("outputCode");
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast("Đã copy code vào khay nhớ tạm!");
+                } catch (err) {
+                    showToast("Không thể copy tự động, vui lòng copy tay", "error");
+                }
+            }
+        }
+
+        function downloadCode() {
+            if (!currentGeneratedCode) return;
+
+            const fileName = getCampaignFileName();
+
+            // Tạo Blob file
+            const blob = new Blob([currentGeneratedCode], { type: "text/html" });
+            const url = URL.createObjectURL(blob);
+            
+            // Tạo thẻ <a> ẩn để kích hoạt download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Dọn dẹp
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast(`Đã tải xuống file: ${fileName}`);
         }
     </script>
 </body>
