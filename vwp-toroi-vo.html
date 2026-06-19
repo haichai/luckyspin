@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>haichai - Nhận Ưu Đãi & Vòng Quay May Mắn</title>
+    <style>
+        /* Reset & Base */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #1a1a1a; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        /* Main Button (Vòng quay may mắn - Hiển thị sau khi tắt popup) */
+        .spin-btn { 
+            background: linear-gradient(135deg, #ff0050, #00f2fe);
+            color: white; 
+            border: none; 
+            padding: 20px 40px; 
+            font-size: 1.5rem; 
+            font-weight: bold; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            text-decoration: none; 
+            box-shadow: 0 10px 30px rgba(255, 0, 80, 0.4); 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            display: none; /* Ẩn đi lúc đầu */
+            text-align: center;
+            animation: pulse 1.5s infinite;
+        }
+        .spin-btn:active { 
+            transform: scale(0.95); 
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 80, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 0, 80, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 80, 0); }
+        }
+
+        /* Popup Modal */
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0, 0, 0, 0.85); 
+            backdrop-filter: blur(5px);
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000; 
+            opacity: 0; 
+            visibility: hidden; 
+            transition: all 0.3s ease; 
+        }
+        .modal-overlay.active { 
+            opacity: 1; 
+            visibility: visible; 
+        }
+        .modal-content { 
+            background: white; 
+            padding: 40px 25px; 
+            border-radius: 16px; 
+            text-align: center; 
+            width: 90%; 
+            max-width: 380px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+        
+        .modal-content h2 { margin-bottom: 15px; font-size: 1.6rem; color: #111; }
+        .modal-content p { color: #555; margin-bottom: 30px; font-size: 1rem; line-height: 1.6; }
+        
+        /* TikTok Button inside Modal */
+        .tiktok-btn { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 10px;
+            background-color: #000; 
+            color: #fff; 
+            padding: 16px 25px; 
+            border-radius: 12px; 
+            text-decoration: none; 
+            font-weight: bold; 
+            width: 100%; 
+            font-size: 1.1rem;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .tiktok-btn:hover { background-color: #111; }
+        .tiktok-btn:active { transform: scale(0.98); }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Nút chính ẩn lúc đầu, chỉ hiện sau khi tắt popup -->
+    <button id="mainSpinBtn" class="spin-btn" onclick="window.location.href='https://store.haichai.workers.dev/VWP-toroi'">
+        🎁 Tới Vòng Quay May Mắn 🎁
+    </button>
+
+    <!-- Popup yêu cầu Follow -->
+    <div class="modal-overlay" id="tiktokModal">
+        <div class="modal-content">
+            <h2>Theo dõi haichai ngay!</h2>
+            <p>Hãy Follow kênh TikTok của chúng tôi để nhận quà và mở khoá Vòng Quay May Mắn nhé!</p>
+            
+            <a href="https://www.tiktok.com/@haichai.trung" target="_blank" class="tiktok-btn" onclick="handleFollow()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3z"/>
+                </svg>
+                Follow TikTok Để Nhận Quà
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Mở popup ngay khi vừa load xong trang (độ trễ nhỏ để có hiệu ứng mượt)
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('tiktokModal').classList.add('active');
+            }, 150); 
+        };
+
+        // Hàm xử lý khi người dùng ấn nút Follow
+        function handleFollow() {
+            // 1. Tắt popup
+            document.getElementById('tiktokModal').classList.remove('active');
+            // 2. Hiện nút Vòng Quay ở ngoài màn hình chính
+            document.getElementById('mainSpinBtn').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
