@@ -279,9 +279,31 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
             transform: translateY(20px) scale(0.95);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
         }
         .modal-overlay.active .modal-content {
             transform: translateY(0) scale(1);
+        }
+        
+        /* Nút Close (X) góc phải trên */
+        .close-icon {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 28px;
+            line-height: 1;
+            color: #aaa;
+            cursor: pointer;
+            opacity: 0; /* Ẩn đi lúc đầu */
+            pointer-events: none;
+            transition: opacity 0.5s ease, color 0.2s;
+        }
+        .close-icon.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .close-icon:hover {
+            color: #333;
         }
         
         .modal-content h2 { margin-bottom: 15px; font-size: 1.6rem; color: #111; }
@@ -318,10 +340,11 @@
     <!-- Popup yêu cầu Follow -->
     <div class="modal-overlay" id="tiktokModal">
         <div class="modal-content">
+            <span class="close-icon" id="closeBtn" onclick="handleClose()">&times;</span>
             <h2>Theo dõi haichai ngay!</h2>
             <p>Hãy Follow kênh TikTok của chúng tôi để nhận quà và mở khoá Vòng Quay May Mắn nhé!</p>
             
-            <a href="${tiktokUrl}" target="_blank" class="tiktok-btn" onclick="handleFollow()">
+            <a href="${tiktokUrl}" target="_blank" class="tiktok-btn" onclick="handleClose()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3z"/>
                 </svg>
@@ -335,11 +358,16 @@
         window.onload = function() {
             setTimeout(() => {
                 document.getElementById('tiktokModal').classList.add('active');
+                
+                // Hiện nút X sau 3 giây (3000ms)
+                setTimeout(() => {
+                    document.getElementById('closeBtn').classList.add('show');
+                }, 3000);
             }, 150); 
         };
 
-        // Hàm xử lý khi người dùng ấn nút Follow
-        function handleFollow() {
+        // Hàm xử lý chung khi đóng popup
+        function handleClose() {
             // 1. Tắt popup
             document.getElementById('tiktokModal').classList.remove('active');
             // 2. Hiện nút Vòng Quay ở ngoài màn hình chính
